@@ -13,7 +13,7 @@ const DividierLine = ({width = 'w-full'}) => (
     />
 )
 
-const useLoginForm = () => {
+const useLoginForm = ({onLoginAttempt}) => {
     const [ username, setUsername ] = useState('');
     const [password, setPassword] = useState('');
     const [outputMessage, setOutputMessage ] = useState('Enter your credentials below.');
@@ -31,6 +31,7 @@ const useLoginForm = () => {
         setOutputMessage('Ready to submit');
     };
 
+    // handlSubmit uses an async function because it needs to consume (call) another async function for validation
     const handleSubmit = useCallback(async () => {
         if (username.length > 0 && password.length > 0) {
             console.log(`Submitting username: ${username} and password: ${password}`);
@@ -42,14 +43,17 @@ const useLoginForm = () => {
             // ----------------------------------------------------------------
             // In a real application, you would replace this with:
             // const response = await fetch('/api/login', { method: 'POST', body: JSON.stringify({username, password}) });
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+            if (onLoginAttempt) {
+                // consuming the async call to validate login attempt - Promise from consumed function is propagated here on its return so no need to intiialize a new Promise
+                const loginSuccess = await onLoginAttempt(username, password);
 
-            // MOCK VALIDATION (admin/1234 is valid)
-            if (username === 'admin' && password === '1234') {
-                setOutputMessage('Login successful! Redirecting to dashboard...');
-                
+                if (loginSuccess) {
+                    setOutputMessage('Login successful! Redirecting to dashboard...');
+                } else {
+                    setOutputMessage('Invalid credentials. Try again. (Hint: admin/1234)');
+                }
             } else {
-                setOutputMessage('Invalid credentials. Try again. (Hint: admin/1234)');
+                setOutputMessage('INTERNAL ERROR - onLoginAttempt undefined or not passed');
             }
 
             setIsLoading(false);            
@@ -75,7 +79,7 @@ const useLoginForm = () => {
     }
 }
 
-function MyComp_SimpleLogin() {
+function MyComp_SimpleLogin({onLoginAttempt}) {
     const {
         username,
         password,
@@ -84,7 +88,7 @@ function MyComp_SimpleLogin() {
         handleChange,
         handleSubmit,
         handleClear
-    } = useLoginForm();
+    } = useLoginForm(onLoginAttempt);
 
     return (
         <div
