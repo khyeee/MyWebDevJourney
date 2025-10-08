@@ -13,7 +13,7 @@ const DividierLine = ({width = 'w-full'}) => (
     />
 )
 
-const useLoginForm = ({onLoginAttempt}) => {
+const useLoginForm = (onLoginAttempt) => {
     const [ username, setUsername ] = useState('');
     const [password, setPassword] = useState('');
     const [outputMessage, setOutputMessage ] = useState('Enter your credentials below.');
