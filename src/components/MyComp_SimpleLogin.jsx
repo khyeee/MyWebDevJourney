@@ -17,6 +17,7 @@ const useLoginForm = () => {
     const [ username, setUsername ] = useState('');
     const [password, setPassword] = useState('');
     const [outputMessage, setOutputMessage ] = useState('Enter your credentials below.');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const {name, value} = e.target;
@@ -30,10 +31,28 @@ const useLoginForm = () => {
         setOutputMessage('Ready to submit');
     };
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
         if (username.length > 0 && password.length > 0) {
             console.log(`Submitting username: ${username} and password: ${password}`);
             setOutputMessage(`Attempting to login to ${username}...`);
+            setIsLoading(true);
+            
+            // ----------------------------------------------------------------
+            // SIMULATION OF API CALL TO DATABASE/PLC GATEWAY
+            // ----------------------------------------------------------------
+            // In a real application, you would replace this with:
+            // const response = await fetch('/api/login', { method: 'POST', body: JSON.stringify({username, password}) });
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+
+            // MOCK VALIDATION (admin/1234 is valid)
+            if (username === 'admin' && password === '1234') {
+                setOutputMessage('Login successful! Redirecting to dashboard...');
+                
+            } else {
+                setOutputMessage('Invalid credentials. Try again. (Hint: admin/1234)');
+            }
+
+            setIsLoading(false);            
         } else {
             setOutputMessage('Please fill in both fields');
         }
@@ -49,6 +68,7 @@ const useLoginForm = () => {
         username,
         password,
         outputMessage,
+        isLoading,
         handleChange,
         handleSubmit,
         handleClear
@@ -60,6 +80,7 @@ function MyComp_SimpleLogin() {
         username,
         password,
         outputMessage,
+        isLoading,
         handleChange,
         handleSubmit,
         handleClear
@@ -74,7 +95,7 @@ function MyComp_SimpleLogin() {
             <h1 className="font-bold text-3xl mb-4">
                 User Login
             </h1>
-            <span className="text-gray-400 text-sm mb-4">{outputMessage}</span>
+            <span className="text-gray-400 text-sm mb-4">{`${isLoading ? "Verifying... " : ""}${outputMessage}`}</span>
             <div className={clsx(
                 "flex w-full mx-4 items-center mb-2"
             )}>
